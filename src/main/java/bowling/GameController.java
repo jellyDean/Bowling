@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,7 +64,7 @@ public class GameController {
 	    					int firstCharInt = Character.getNumericValue(firstCharofFrame);
 	    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
 	    					int sum = firstCharInt + secondCharInt;
-	    					if (sum > 10 || sum < 0){
+	    					if (sum >= 10 || sum < 0){
 	    						System.out.println("code 500 open 10th frame sum is greater than 10 or less than 0 for the first and second throw (sum,frame) " + sum + " " + frame);
 	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
@@ -99,15 +100,22 @@ public class GameController {
 	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
+    						if (secondCharofFrame == 'x' && thirdCharofFrame == '/'){
+    							System.out.println("code 500 10 frame with three throws cannot have second throw strike and third throw a spare " + frame);
+	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+    						}
+	    					
 	    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
 	    					int thirdCharInt = Character.getNumericValue(thirdCharofFrame);
 	    					//if the second and third throw are numbers they cannot be greater than 10 or less than 0
 	    					if (secondCharInt != -1 && thirdCharInt != -1){
-		    					int sum = secondCharInt + thirdCharInt;
-		    					if (sum > 10 || sum < 0){
-		    						System.out.println("code 500 open 10th frame sum is greater than 10 or less than 0 for the second and third throw (sum,frame) " + sum + " " + frame);
-		    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
-		    					}
+	    						if (secondCharofFrame != 'x' && thirdCharofFrame != 'x'){
+			    					int sum = secondCharInt + thirdCharInt;
+			    					if (sum >= 10 || sum < 0){
+			    						System.out.println("code 500 open 10th frame sum is greater than 10 or less than 0 for the second and third throw (sum,frame) " + sum + " " + frame);
+			    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+			    					}
+	    						}
 	    					}
 	    					//third char can be spare
 	    					//middle and last char can be x or number
@@ -144,7 +152,7 @@ public class GameController {
 		    					int firstCharInt = Character.getNumericValue(firstCharofFrame);
 		    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
 		    					int sum = firstCharInt + secondCharInt;
-		    					if (sum > 10 || sum < 0){
+		    					if (sum >= 10 || sum < 0){
 		    						System.out.println("code 500 open frame sum is greater than 10 or less than 0 (sum,frame) " + sum + " " + frame);
 		    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 		    					}
@@ -153,7 +161,6 @@ public class GameController {
 	    				}
 	    				else{
 	    					//validate that any frame that is not a strike and not frame 10 should contain two throws
-	    					System.out.println("code 500 iregular number of throws in frame "+ frame);
 	    					return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    				}
 	    			}
@@ -168,6 +175,17 @@ public class GameController {
 
 	    		Integer totalScore = calculateTotalScore(frameList);
 
+	    		// output
+	    		//
+	    		String turkeyString = gameString.replace("-", "").toLowerCase();
+	    		int numberOfTurkeys = StringUtils.countOccurrencesOf(turkeyString, "xxx");
+	    		System.out.println("TURKEY TURKEY TURKEY " + numberOfTurkeys + " " + turkeyString);
+	    		for (int i = 0; i < frameList.size(); i++) {
+	    			Frame currentBowlingframe = frameList.get(i);
+	    			totalScore = totalScore + currentBowlingframe.getFrameScore();
+	    			currentBowlingframe.setFrameRunningTotal(totalScore);
+	    			System.out.println("bowling game scores per frame " + currentBowlingframe.getFrameNumber() + " " + currentBowlingframe.getFrameScore() + " " + currentBowlingframe.getFrameRunningTotal());
+	    		}
 	    		gameOut.setScore(totalScore);
 	    	}else {
 	    		System.out.println("code 500 bowling game string does not exist");
@@ -177,10 +195,9 @@ public class GameController {
 	    }
 	    return new ResponseEntity<GameOutput>(gameOut, HttpStatus.OK);
 	}//end post end point
-	
 
-//	process frames, calculate the score of each on them individually
-//	X-7/-72-9/-X-X-X-23-6/-7/3
+//	process frames, calculate the score of each on them individually then sum them all up
+//	InputString:    X-7/-72-9/-X-X-X-23-6/-7/3
 //	Frame:			1	2	3	4	5	6	7	8	9	10
 //	Result:			X	7/	72	9/	X	X	X	23	6/	7/3
 //	Frame Score:	20	17	9	20	30	22	15	5	17	13
@@ -193,8 +210,132 @@ public class GameController {
 		   String currentFrameString = currentBowlingframe.getFrameString();
 		   char firstThrowOfCurrentFrame = currentFrameString.charAt(0);
 		  
-		   //if not the last frame
-		   if (i != 9){
+		   //if the last or second to last frame
+		   if (i == 9 || i == 8){
+			   
+			   if (i == 8){
+				   //if first throw of 9th frame is a strike
+				   if (firstThrowOfCurrentFrame == 'x'){
+					   Frame tenthBowlingFrame = frameList.get(i+1);
+					   String tenthBowlingFrameString = tenthBowlingFrame.getFrameString();
+					   char firstThrowOfTenthFrame = tenthBowlingFrameString.charAt(0);
+					   char secondThrowOnTenthFrame = tenthBowlingFrameString.charAt(1);
+					   
+					   //if first throw of 10th frame is a strike
+					   if (firstThrowOfTenthFrame == 'x'){
+						  
+						   //if the second throw of 10th frame is a strike, we got a turkey
+						   if (secondThrowOnTenthFrame == 'x'){
+							   currentBowlingframe.setFrameScore(30);
+							   
+						   //if the first throw on the 9th frame and first throw on 10th frame were strikes but the second throw on the tenth frame was not
+						   }else{
+							   int secondThrowOnTenthFrameInteger = Character.getNumericValue(secondThrowOnTenthFrame);
+							   int sum = 20 + secondThrowOnTenthFrameInteger;
+							   currentBowlingframe.setFrameScore(sum);
+						   }
+						   
+					   // if the first throw on the 9th frame was a strike but the first throw 10th frame was not a strike  
+					   }else{
+						   int secondThrowOfTenthFrameInteger = Character.getNumericValue(secondThrowOnTenthFrame);
+						   if (secondThrowOfTenthFrameInteger == -1){
+							   //second throw of 10 frame is spare, set to 20
+							   currentBowlingframe.setFrameScore(20);
+							   
+						   }else{
+							   //second throw of 10 frame is open add the value of the first throw on the tenth frame and 10 for first strike bonus
+							   int firstThrowOfTenthFrameInteger = Character.getNumericValue(firstThrowOfTenthFrame);
+							   int sum = firstThrowOfTenthFrameInteger + secondThrowOfTenthFrameInteger + 10;
+							   currentBowlingframe.setFrameScore(sum);
+						   } 
+					   }
+				   //else if first throw of 9th frame is not strike
+				   }else{
+					   char secondThrowOfCurrentFrame = currentFrameString.charAt(1);  
+					   //handle spare on second throw
+					   if (secondThrowOfCurrentFrame == '/' ){
+						   Frame nextBowlingFrame = frameList.get(i+1);
+						   String nextFrameString = nextBowlingFrame.getFrameString();
+						   char firstThrowOfNextFrame = nextFrameString.charAt(0);
+						   //if the first throw of the next frame is a strike, current score is 20
+						   if (firstThrowOfNextFrame == 'x'){
+							   currentBowlingframe.setFrameScore(20);
+						   //if the first throw of next frame is not a strike add 10 for the spare and sum in the open value
+						   }else{
+							   int firstThrowOfNextFrameInteger = Character.getNumericValue(firstThrowOfNextFrame);
+							   int sum = 10 + firstThrowOfNextFrameInteger;
+							   currentBowlingframe.setFrameScore(sum);
+						   }
+					   //handle open case
+					   }else{
+						   int firstThrowOfCurrentFrameInteger = Character.getNumericValue(firstThrowOfCurrentFrame);
+						   int secondThrowOfCurrentFrameInteger = Character.getNumericValue(secondThrowOfCurrentFrame);
+						   int sum = firstThrowOfCurrentFrameInteger + secondThrowOfCurrentFrameInteger;
+						   currentBowlingframe.setFrameScore(sum);
+						   }
+				   }
+				   
+			   //else if 10th frame
+			   }else{
+				   // if the first throw of the tenth frame is strike
+				   if (firstThrowOfCurrentFrame == 'x'){
+					   char secondThrowOnTenthFrame = currentFrameString.charAt(1);
+					   char thirdThrowOnTenthFrame = currentFrameString.charAt(2);
+					   int thirdThrowOnTenthFrameInteger = Character.getNumericValue(thirdThrowOnTenthFrame);
+					   int secondThrowOnTenthFrameInteger = Character.getNumericValue(thirdThrowOnTenthFrame);
+					   
+					   //if the second throw of 10th frame is a strike,
+					   if (secondThrowOnTenthFrame == 'x'){
+						   
+						   //if third throw of the tenth from is a strike, turkey material
+						   if (thirdThrowOnTenthFrame == 'x'){
+							   currentBowlingframe.setFrameScore(30);
+						   //if the third throw of the tenth frame is not strike, must be numeric add 20 to it
+						   }else{
+							   
+							   int sum = 20 + thirdThrowOnTenthFrameInteger;
+							   currentBowlingframe.setFrameScore(sum);
+						   }
+					   //if the second throw on the 10th frame is not a strike, it must be a numeric, check for spare or numeric in third throw
+					   }else{
+						   //third throw of 10 frame is spare, set to 20
+						   if (thirdThrowOnTenthFrameInteger == -1){
+							   currentBowlingframe.setFrameScore(20);
+							   
+						   //third throw of 10 frame is open add the value of the first throw on the tenth frame and 10 for first strike bonus  
+						   }else{
+							   int sum = thirdThrowOnTenthFrameInteger + secondThrowOnTenthFrameInteger + 10;
+							   currentBowlingframe.setFrameScore(sum);
+						   } 
+					   }
+				   //if the first throw on the tenth frame is not a strike	   
+				   }else{
+					   char secondThrowOfCurrentFrame = currentFrameString.charAt(1);  
+					   //handle spare on second throw
+					   if (secondThrowOfCurrentFrame == '/' ){
+						   char thirdThrowOfTenthFrame = currentFrameString.charAt(2);
+						   //if the first throw of the next frame is a strike, current score is 20
+						   if (thirdThrowOfTenthFrame == 'x'){
+							   currentBowlingframe.setFrameScore(20);
+						   //if the first throw of next frame is not a strike add 10 for the spare and sum in the open value
+						   }else{
+							   int thirdThrowOfNexFrameInteger = Character.getNumericValue(thirdThrowOfTenthFrame);
+							   int sum = 10 + thirdThrowOfNexFrameInteger;
+							   currentBowlingframe.setFrameScore(sum);
+						   }
+					   //handle open case
+					   }else{
+						   int firstThrowOfCurrentFrameInteger = Character.getNumericValue(firstThrowOfCurrentFrame);
+						   int secondThrowOfCurrentFrameInteger = Character.getNumericValue(secondThrowOfCurrentFrame);
+						   int sum = firstThrowOfCurrentFrameInteger + secondThrowOfCurrentFrameInteger;
+						   currentBowlingframe.setFrameScore(sum);
+						   }
+				   }
+			   }
+		   }
+		   
+		   //if not 10th or 9th frame
+		   else{
 			   
 			   //handle strike case for current frame
 			   if (firstThrowOfCurrentFrame == 'x'){
@@ -206,19 +347,19 @@ public class GameController {
 				   if (firstThrowOfNextFrame == 'x'){
 					   Frame lastBowlingFrame = frameList.get(i+2);
 					   String lastFrameString = lastBowlingFrame.getFrameString();
-					   char lastThrowOfLastFrame = lastFrameString.charAt(0);
+					   char firstThrowOfLastFrame = lastFrameString.charAt(0);
 					   
 					   //handle three strikes in a row, a turkey has been hit
-					   if (lastThrowOfLastFrame == 'x'){
+					   if (firstThrowOfLastFrame == 'x'){ 
 						   currentBowlingframe.setFrameScore(30);
 						   
 					   //if the first and second throw were a strike but the third one wasnt
 					   }else{
-						   int thirdThrowOfLastFrameInteger = Character.getNumericValue(lastThrowOfLastFrame);
-						   int sum = 20 + thirdThrowOfLastFrameInteger;
+						   int firstThrowOfLastFrameInteger = Character.getNumericValue(firstThrowOfLastFrame);
+						   int sum = 20 + firstThrowOfLastFrameInteger;
 						   currentBowlingframe.setFrameScore(sum);
 					   }
-				   //if the first throw was a strike but the second one wasnt
+				   //if the first throw was a strike but the second one was not
 				   }else{
 					   char secondThrowOfNextFrame = nextFrameString.charAt(1);
 					   int secondThrowOfNextFrameInteger = Character.getNumericValue(secondThrowOfNextFrame);
@@ -227,15 +368,16 @@ public class GameController {
 						   currentBowlingframe.setFrameScore(20);
 						   
 					   }else{
-						   //second throw of next frame is open add the value of the first throw on the next frame and setscore
+						   //second throw of next frame is open add the value of the first throw on the next frame 10 for first strike and setscore
 						   int firstThrowOfNextFrameInteger = Character.getNumericValue(firstThrowOfNextFrame);
-						   int sum = secondThrowOfNextFrameInteger + firstThrowOfNextFrameInteger;
+						   int sum = secondThrowOfNextFrameInteger + firstThrowOfNextFrameInteger + 10;
 						   currentBowlingframe.setFrameScore(sum);
 					   } 
 				   }
 				   //if the first throw was not a strike
 			   }else{
 				   char secondThrowOfCurrentFrame = currentFrameString.charAt(1);  
+				   //handle spare on second throw
 				   if (secondThrowOfCurrentFrame == '/' ){
 					   Frame nextBowlingFrame = frameList.get(i+1);
 					   String nextFrameString = nextBowlingFrame.getFrameString();
@@ -249,18 +391,19 @@ public class GameController {
 						   int sum = 10 + firstThrowOfNextFrameInteger;
 						   currentBowlingframe.setFrameScore(sum);
 					   }
-					   //handle spare case
-				   
+				   //handle open case
 				   }else{
-					   //handle open case
+					   int firstThrowOfCurrentFrameInteger = Character.getNumericValue(firstThrowOfCurrentFrame);
+					   int secondThrowOfCurrentFrameInteger = Character.getNumericValue(secondThrowOfCurrentFrame);
+					   int sum = firstThrowOfCurrentFrameInteger + secondThrowOfCurrentFrameInteger;
+					   currentBowlingframe.setFrameScore(sum);
 					   }
 			   }
-		   }
-			   
+		   }	   
 		}
 		
-
-	   
+	   System.out.println("code 500 iregular number of throws in frame "+ frameList);
 	   return totalScore; 
 	}
 }//end class gameController
+	
