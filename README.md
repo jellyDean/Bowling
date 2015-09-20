@@ -1,7 +1,4 @@
 # Bowling
-describes how to build, run, and interact the service
-http://localhost:8080/api/v0/platform/get_bowling_score
-
 Build:
 	Importing the project into STS (Spring Tool Suite):
 		1.) Download Spring Tool Suite and create a new web service project named Bowling.
@@ -22,7 +19,7 @@ Run:
 		1.) Right click on "bowling" project and select Run As->Spring Boot App
 		2.) The web service can now be interacted with
 	Running stand alone JAR
-		1.) Open terminal/command prompt=
+		1.) Open terminal/command prompt
 		2.) Navigate to "/bowling/target/" where gs-rest-service-0.1.0.jar is located
 		3.) Type "java -jar gs-rest-service-0.1.0.jar"
 		4.) The web service will start and can now be interacted with. This JAR file can be used anywhere and is not directory specific.
