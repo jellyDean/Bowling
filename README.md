@@ -33,7 +33,7 @@ Interact:<br />
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.) Type in your pay load with bowlingGame input e.g. {"bowlingGame": "X-34-x-9/-x-x-x-90-X-xxx"}<br />
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.) Select "application/json" as content type<br />
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 6.) Click Send<br />
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7.) Assuming your input is valid the response will be {"score":211,"code":200,"message":"Success","turkeys":2,"frameScores":[17,7,20,20,30,29,19,9,30,30]}<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 7.) Assuming your input is valid the response will be {"score":211,"code":200,"message":"Success","turkeys":2,"frameScores":[17,24,44,64,94,123,142,151,181,211]}<br />
 	
 	
 		
