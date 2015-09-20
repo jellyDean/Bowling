@@ -205,8 +205,8 @@ public class GameController {
 	    		for (int i = 0; i < frameList.size(); i++) {
 	    			Frame currentBowlingframe = frameList.get(i);
 	    			totalScore = totalScore + currentBowlingframe.getFrameScore();
-	    			frameScores[i] = currentBowlingframe.getFrameScore();
 	    			currentBowlingframe.setFrameRunningTotal(totalScore);
+	    			frameScores[i] = totalScore;
 	    			//System.out.println("bowling game scores per frame " + currentBowlingframe.getFrameNumber() + " " + currentBowlingframe.getFrameScore() + " " + currentBowlingframe.getFrameRunningTotal());
 	    		}
 	    		gameOut.setFrameScores(frameScores);
@@ -433,7 +433,6 @@ public class GameController {
 		   }	   
 		}
 		
-	   System.out.println("code 500 iregular number of throws in frame "+ frameList);
 	   return totalScore; 
 	}
 }//end class gameController
