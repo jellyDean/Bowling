@@ -30,15 +30,18 @@ public class GameController {
 	    		    char c = gameString.charAt(i);
 	    		    //validate the chars are supported
 	    		    if(supportedCharsString.indexOf(c) == -1){
-	    		    	System.out.println("code 500 invalid chars");
-	    		    	return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+			    		gameOut.setCode(500);
+			    		gameOut.setMessage("Invalid characters in input. Valid chars are only xX/0123456789-");
+			    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    		    }
 	    		}
 	    		String[] frameParts = gameString.split("-");
 	    		//validate a complete game was played
 	    		if (frameParts.length != 10){
 	    			System.out.println("code 500 partial game");
-	    			return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		gameOut.setCode(500);
+		    		gameOut.setMessage("Partial games not supported. Must have 10 frames in a complete game");
+		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    		}
 	    		
 	    		char spare = '/';
@@ -46,6 +49,7 @@ public class GameController {
 	    		for (int i = 0; i < frameParts.length; i++) {
 	    			//validation for last frame
 	    			String frame = frameParts[i];
+	    			Integer frameNumber = i + 1;
 	    			
 	    			if (i == 9){
 	    				//if 10th frame used two throws
@@ -57,16 +61,18 @@ public class GameController {
 	    					//first or second char cant be x or \
 	    					//validate the first throw in a frame cant be spare
 	    					if (firstCharofFrame == spare || firstCharofFrame == lowerStrike || secondCharofFrame == lowerStrike || secondCharofFrame == spare){
-	    						System.out.println("code 500 10 frame with two throws cannot be a spare or strike " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with two throws cannot be a spare or strike. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					// if 10th frame is open sum of throws must be less than 10
 	    					int firstCharInt = Character.getNumericValue(firstCharofFrame);
 	    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
 	    					int sum = firstCharInt + secondCharInt;
 	    					if (sum >= 10 || sum < 0){
-	    						System.out.println("code 500 open 10th frame sum is greater than 10 or less than 0 for the first and second throw (sum,frame) " + sum + " " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("Open 10th frame sum is greater than 10 or less than 0 for the first and second throw. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
    
 	    				   //if 10th frame used three throws
@@ -76,33 +82,38 @@ public class GameController {
 	    					char thirdCharofFrame = Character.toLowerCase(frame.charAt(2)); 
 	    					//first char cannot be a spare
 	    					if (firstCharofFrame == spare){
-	    						System.out.println("code 500 10 frame with three throws cannot have spare as first throw " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with three throws cannot have spare as first throw. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
 	    					Boolean isFirstCharNumber = Character.isDigit(firstCharofFrame);
 	    					
 	    					//if first char is a number second char must be a spare
 	    					if (isFirstCharNumber && secondCharofFrame != '/' ){
-	    						System.out.println("code 500 10 frame with three throws with first throw open must have a spare for the second throw " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with three throws with first throw open must have a spare for the second throw. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
 	    					//if strike middle char cant be spare
 	    					if (firstCharofFrame == 'x' && secondCharofFrame == '/' ){
-	    						System.out.println("code 500 10 frame with three throws with first throw strike cannot have a spare for the second throw " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with three throws with first throw strike cannot have a spare for the second throw. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
 	    					//2nd throw and third throw cannot both be spares
 	    					if (secondCharofFrame == '/' && thirdCharofFrame == '/' ){
-	    						System.out.println("code 500 10 frame with three throws cannot have second and third throws as spares " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with three throws cannot have second and third throws as spares. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
     						if (secondCharofFrame == 'x' && thirdCharofFrame == '/'){
-    							System.out.println("code 500 10 frame with three throws cannot have second throw strike and third throw a spare " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("10th frame with three throws cannot have second throw strike and third throw a spare. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
     						}
 	    					
 	    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
@@ -112,8 +123,9 @@ public class GameController {
 	    						if (secondCharofFrame != 'x' && thirdCharofFrame != 'x'){
 			    					int sum = secondCharInt + thirdCharInt;
 			    					if (sum >= 10 || sum < 0){
-			    						System.out.println("code 500 open 10th frame sum is greater than 10 or less than 0 for the second and third throw (sum,frame) " + sum + " " + frame);
-			    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+				    		    		gameOut.setCode(500);
+				    		    		gameOut.setMessage("Open 10th frame sum is greater than 10 or less than 0 for the second and third throw. Frame #: " + frameNumber);
+				    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 			    					}
 	    						}
 	    					}
@@ -122,30 +134,35 @@ public class GameController {
 	    					
 	    			    //if 10th frame didnt use two or three throws we have an error
 	    				}else{
-	    					System.out.println("code 500 10th frame must have 2 or 3 rolls");
-	    					return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+	    		    		gameOut.setCode(500);
+	    		    		gameOut.setMessage("10th frame must have 2 or 3 rolls. Frame #: " + frameNumber);
+	    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    				}
-	    				
+	    			// if not the 10th frame	
 	    			}else{
 	    				if (frame.length() == 1){
 	    					//validate if there is one char in a frame that it is a strike
 	    					if (!frame.equalsIgnoreCase("x")){
-	    						System.out.println("code 500 one shot thrown and wasnt marked as a strike "+ frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("One shot thrown and wasnt marked as a strike. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    				} else if (frame.length() == 2){
 	    					
 	    					if (frame.toLowerCase().contains("x")){
-	    						System.out.println("code 500 cannot have two throws and contain a strike " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+	    						
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("Cannot have two throws and contain a strike. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					char firstCharofFrame = frame.charAt(0);
 	    					char secondCharofFrame = frame.charAt(1);
 	    					
 	    					//validate the first throw in a frame cant be spare
 	    					if (firstCharofFrame == spare){
-	    						System.out.println("code 500 first throw of frame cannot be a spare " + frame);
-	    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+		    		    		gameOut.setCode(500);
+		    		    		gameOut.setMessage("First throw of frame cannot be a spare. Frame #: " + frameNumber);
+		    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    					}
 	    					
 	    					if(secondCharofFrame != spare){
@@ -153,15 +170,18 @@ public class GameController {
 		    					int secondCharInt = Character.getNumericValue(secondCharofFrame);
 		    					int sum = firstCharInt + secondCharInt;
 		    					if (sum >= 10 || sum < 0){
-		    						System.out.println("code 500 open frame sum is greater than 10 or less than 0 (sum,frame) " + sum + " " + frame);
-		    						return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+			    		    		gameOut.setCode(500);
+			    		    		gameOut.setMessage("Open frame sum is greater than 10 or less than 0. Frame #: " + frameNumber);
+			    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 		    					}
 	   
 	    					}
 	    				}
 	    				else{
 	    					//validate that any frame that is not a strike and not frame 10 should contain two throws
-	    					return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
+	    		    		gameOut.setCode(500);
+	    		    		gameOut.setMessage("Bowling frame must contain two throws if not a strike. Frame #: " + frameNumber);
+	    		    		return new ResponseEntity<GameOutput>(gameOut, HttpStatus.CONFLICT);
 	    				}
 	    			}
 	    			//frames have been validated, add them to framelist for processing
@@ -176,21 +196,34 @@ public class GameController {
 	    		Integer totalScore = calculateTotalScore(frameList);
 
 	    		// output
-	    		//
+	    		// set number of turkeys
 	    		String turkeyString = gameString.replace("-", "").toLowerCase();
 	    		int numberOfTurkeys = StringUtils.countOccurrencesOf(turkeyString, "xxx");
+	    		gameOut.setTurkeys(numberOfTurkeys);
+	    		
+	    		int[] frameScores = new int[10];
+	    		
 	    		System.out.println("TURKEY TURKEY TURKEY " + numberOfTurkeys + " " + turkeyString);
 	    		for (int i = 0; i < frameList.size(); i++) {
 	    			Frame currentBowlingframe = frameList.get(i);
 	    			totalScore = totalScore + currentBowlingframe.getFrameScore();
+	    			frameScores[i] = currentBowlingframe.getFrameScore();
 	    			currentBowlingframe.setFrameRunningTotal(totalScore);
 	    			System.out.println("bowling game scores per frame " + currentBowlingframe.getFrameNumber() + " " + currentBowlingframe.getFrameScore() + " " + currentBowlingframe.getFrameRunningTotal());
 	    		}
+	    		gameOut.setFrameScores(frameScores);
 	    		gameOut.setScore(totalScore);
+	    		gameOut.setCode(200);
+	    		gameOut.setMessage("Success");
+	    		
 	    	}else {
-	    		System.out.println("code 500 bowling game string does not exist");
+	    		gameOut.setCode(500);
+	    		gameOut.setMessage("Bowling game string does not exist in request");
+	    		System.out.println("code 500 ");
 	    	}
 	    }else{
+    		gameOut.setCode(500);
+    		gameOut.setMessage("Bowling game not sent in request");
 	    	System.out.println("code 500 game not sent in request");
 	    }
 	    return new ResponseEntity<GameOutput>(gameOut, HttpStatus.OK);
