@@ -1,4 +1,4 @@
-# Bowling
+# Bowling readme
 Build:
 	Importing the project into STS (Spring Tool Suite):
 		1.) Download Spring Tool Suite and create a new web service project named Bowling.
