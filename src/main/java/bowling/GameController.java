@@ -199,17 +199,15 @@ public class GameController {
 	    		// set number of turkeys
 	    		String turkeyString = gameString.replace("-", "").toLowerCase();
 	    		int numberOfTurkeys = StringUtils.countOccurrencesOf(turkeyString, "xxx");
-	    		gameOut.setTurkeys(numberOfTurkeys);
-	    		
 	    		int[] frameScores = new int[10];
-	    		
-	    		System.out.println("TURKEY TURKEY TURKEY " + numberOfTurkeys + " " + turkeyString);
+	    		gameOut.setTurkeys(numberOfTurkeys);
+	    		//System.out.println("TURKEY TURKEY TURKEY " + numberOfTurkeys + " " + turkeyString);
 	    		for (int i = 0; i < frameList.size(); i++) {
 	    			Frame currentBowlingframe = frameList.get(i);
 	    			totalScore = totalScore + currentBowlingframe.getFrameScore();
 	    			frameScores[i] = currentBowlingframe.getFrameScore();
 	    			currentBowlingframe.setFrameRunningTotal(totalScore);
-	    			System.out.println("bowling game scores per frame " + currentBowlingframe.getFrameNumber() + " " + currentBowlingframe.getFrameScore() + " " + currentBowlingframe.getFrameRunningTotal());
+	    			//System.out.println("bowling game scores per frame " + currentBowlingframe.getFrameNumber() + " " + currentBowlingframe.getFrameScore() + " " + currentBowlingframe.getFrameRunningTotal());
 	    		}
 	    		gameOut.setFrameScores(frameScores);
 	    		gameOut.setScore(totalScore);
