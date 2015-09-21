@@ -313,7 +313,7 @@ public class GameController {
 					   char secondThrowOnTenthFrame = currentFrameString.charAt(1);
 					   char thirdThrowOnTenthFrame = currentFrameString.charAt(2);
 					   int thirdThrowOnTenthFrameInteger = Character.getNumericValue(thirdThrowOnTenthFrame);
-					   int secondThrowOnTenthFrameInteger = Character.getNumericValue(thirdThrowOnTenthFrame);
+					   int secondThrowOnTenthFrameInteger = Character.getNumericValue(secondThrowOnTenthFrame);
 					   
 					   //if the second throw of 10th frame is a strike,
 					   if (secondThrowOnTenthFrame == 'x'){
